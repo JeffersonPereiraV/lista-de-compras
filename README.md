@@ -40,24 +40,6 @@ Buscar:
 Use a primeira caixa de busca para filtrar tópicos por nome.
 Use a segunda caixa para filtrar itens por nome ou descrição.
 
-Estrutura do Projeto
-lib/
-├── main.dart          # Ponto de entrada e configuração do tema
-├── models/            # Modelos de dados
-│   ├── item.dart      # Estrutura de um item
-│   ├── topic.dart     # Estrutura de um tópico
-├── services/          # Serviços reutilizáveis
-│   ├── storage.dart   # Persistência com SharedPreferences
-│   ├── search.dart    # Lógica de busca
-├── widgets/           # Componentes de UI
-│   ├── topic_card.dart # Cartão de tópico
-│   ├── item_tile.dart  # Linha de item
-│   ├── dialog.dart     # Diálogo personalizado
-├── screens/           # Telas da aplicação
-│   ├── home.dart      # Tela principal
-│   ├── add_item.dart  # Tela de adição de item
-│   ├── edit_item.dart # Tela de edição de item
-
 Funcionalidades
   Tópicos: Crie categorias para organizar itens.
   Itens: Adicione detalhes como nome, descrição e preço.
