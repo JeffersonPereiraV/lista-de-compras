@@ -35,9 +35,9 @@ class CustomDialog extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(child: Text('Cancelar'), onPressed: onCancel),
+        TextButton(child: const Text('Cancelar'), onPressed: onCancel),
         ElevatedButton(
-          child: Text('Salvar'),
+          child: const Text('Salvar'),
           onPressed: () => onSave(controller.text.trim()),
         ),
       ],

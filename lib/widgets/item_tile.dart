@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/item.dart';
-import '../screens/edit_item.dart';
 
 class ItemTile extends StatelessWidget {
   final Item item;
@@ -11,6 +11,7 @@ class ItemTile extends StatelessWidget {
   final Function(int, int) onDelete;
 
   const ItemTile({
+    super.key,
     required this.item,
     required this.topicIndex,
     required this.itemIndex,
@@ -55,11 +56,11 @@ class ItemTile extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.edit, color: Colors.deepOrange[400]),
             onPressed: () async {
-              final result = await showDialog<Item>(
-                context: context,
-                builder: (_) => EditItem(item: item),
+              final result = await context.push(
+                '/edit-item/$topicIndex/$itemIndex',
+                extra: item,
               );
-              if (result != null) {
+              if (result != null && result is Item) {
                 onEdit(topicIndex, itemIndex, result);
               }
             },

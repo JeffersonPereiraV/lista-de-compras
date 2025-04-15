@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/item.dart';
 import '../models/topic.dart';
 import 'item_tile.dart';
-import '../screens/add_item.dart';
 
 class TopicCard extends StatelessWidget {
   final Topic topic;
   final int topicIndex;
   final Function(int, int) onToggleItem;
   final Function(int) onDeleteTopic;
-  final Function(int) onEditTopic;
+  final Function(int, String) onEditTopic;
   final Function(int, Item) onAddItem;
   final Function(int, int, Item) onEditItem;
   final Function(int, int) onDeleteItem;
 
   const TopicCard({
+    super.key,
     required this.topic,
     required this.topicIndex,
     required this.onToggleItem,
@@ -32,7 +33,7 @@ class TopicCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
       child: ExpansionTile(
         collapsedBackgroundColor: Colors.teal[900]!.withOpacity(0.2),
         backgroundColor: Colors.teal[900]!.withOpacity(0.1),
@@ -46,7 +47,7 @@ class TopicCard extends StatelessWidget {
                 color: Colors.teal[400],
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               'Subtotal: R\$ ${_calculateTopicTotal().toStringAsFixed(2)}',
               style: TextStyle(
@@ -62,7 +63,15 @@ class TopicCard extends StatelessWidget {
           children: [
             IconButton(
               icon: Icon(Icons.edit, color: Colors.deepOrange[400]),
-              onPressed: () => onEditTopic(topicIndex),
+              onPressed: () async {
+                final result = await context.push(
+                  '/edit-topic/$topicIndex',
+                  extra: topic.name,
+                );
+                if (result != null && result is Map && result['name'] != null) {
+                  onEditTopic(topicIndex, result['name'] as String);
+                }
+              },
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red[900]),
@@ -83,18 +92,15 @@ class TopicCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton.icon(
-              icon: Icon(Icons.add),
-              label: Text('Adicionar Item'),
+              icon: const Icon(Icons.add),
+              label: const Text('Adicionar Item'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepOrange[800],
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
-                final result = await showDialog<Item>(
-                  context: context,
-                  builder: (_) => AddItem(),
-                );
-                if (result != null) {
+                final result = await context.push('/add-item/$topicIndex');
+                if (result != null && result is Item) {
                   onAddItem(topicIndex, result);
                 }
               },

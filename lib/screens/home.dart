@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/item.dart';
 import '../models/topic.dart';
 import '../services/storage.dart';
 import '../services/search.dart';
 import '../widgets/topic_card.dart';
-import '../widgets/dialog.dart';
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -48,26 +50,11 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void _editTopicName(int index) async {
-    final controller = TextEditingController(text: topics[index].name);
-    final result = await showDialog<String>(
-      context: context,
-      builder:
-          (_) => CustomDialog(
-            title: 'Editar Tópico',
-            labelText: 'Nome do Tópico',
-            controller: controller,
-            onCancel: () => Navigator.pop(context),
-            onSave: (value) => Navigator.pop(context, value),
-          ),
-    );
-
-    if (result != null && result.isNotEmpty) {
-      setState(() {
-        topics[index].name = result;
-        _saveData();
-      });
-    }
+  void _editTopicName(int index, String name) {
+    setState(() {
+      topics[index].name = name;
+      _saveData();
+    });
   }
 
   void _deleteTopic(int index) {
@@ -133,11 +120,14 @@ class _HomeState extends State<Home> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Lista de Compras', style: TextStyle(color: Colors.white)),
-            SizedBox(height: 4),
+            const Text(
+              'Lista de Compras',
+              style: TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 4),
             Text(
               'Total: R\$ ${_calculateTotalPrice().toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 14, color: Colors.white70),
+              style: const TextStyle(fontSize: 14, color: Colors.white70),
             ),
           ],
         ),
@@ -145,7 +135,7 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.teal[900],
         actions: [
           IconButton(
-            icon: Icon(Icons.checklist, color: Colors.white),
+            icon: const Icon(Icons.checklist, color: Colors.white),
             onPressed: _toggleAllItemsChecked,
             tooltip: allChecked ? 'Desmarcar Todos' : 'Marcar Todos',
           ),
@@ -160,17 +150,17 @@ class _HomeState extends State<Home> {
                 setState(() => topicSearchQuery = value);
                 _updateFilteredTopics();
               },
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
                 hintText: 'Buscar tópicos...',
                 hintStyle: TextStyle(color: Colors.white70),
-                prefixIcon: Icon(Icons.category, color: Colors.teal[400]),
+                prefixIcon: Icon(Icons.category, color: Colors.teal),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.teal[400]!),
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  borderSide: BorderSide(color: Colors.teal),
                 ),
               ),
             ),
@@ -182,17 +172,17 @@ class _HomeState extends State<Home> {
                 setState(() => itemSearchQuery = value);
                 _updateFilteredTopics();
               },
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
                 hintText: 'Buscar itens...',
                 hintStyle: TextStyle(color: Colors.white70),
-                prefixIcon: Icon(Icons.search, color: Colors.teal[400]),
+                prefixIcon: Icon(Icons.search, color: Colors.teal),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.teal[400]!),
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  borderSide: BorderSide(color: Colors.teal),
                 ),
               ),
             ),
@@ -221,24 +211,12 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.deepOrange[800],
         foregroundColor: Colors.white,
         onPressed: () async {
-          final controller = TextEditingController();
-          final result = await showDialog<String>(
-            context: context,
-            builder:
-                (_) => CustomDialog(
-                  title: 'Novo Tópico',
-                  labelText: 'Nome do Tópico',
-                  controller: controller,
-                  onCancel: () => Navigator.pop(context),
-                  onSave: (value) => Navigator.pop(context, value),
-                ),
-          );
-
-          if (result != null && result.trim().isNotEmpty) {
-            _addTopic(result.trim());
+          final result = await context.push('/add-topic');
+          if (result != null && result is Map && result['name'] != null) {
+            _addTopic(result['name'] as String);
           }
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
