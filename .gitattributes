@@ -5,6 +5,8 @@
 *.h text eol=lf
 *.cpp text eol=lf
 *.c text eol=lf
+*.cmake text eol=lf
+*.swift text eol=lf
 
 # Arquivos de texto genéricos usam terminações nativas
 *.txt text

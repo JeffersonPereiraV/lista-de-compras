@@ -30,6 +30,34 @@ class TopicCard extends StatelessWidget {
     return topic.items.fold(0.0, (sum, item) => sum + item.price);
   }
 
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirmar Exclusão'),
+            content: Text('Deseja excluir o tópico "${topic.name}"?'),
+            backgroundColor: Colors.grey[850],
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  onDeleteTopic(topicIndex);
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[900],
+                ),
+                child: const Text('Excluir'),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -75,7 +103,7 @@ class TopicCard extends StatelessWidget {
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red[900]),
-              onPressed: () => onDeleteTopic(topicIndex),
+              onPressed: () => _confirmDelete(context),
             ),
           ],
         ),
@@ -91,19 +119,43 @@ class TopicCard extends StatelessWidget {
             ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Adicionar Item'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange[800],
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () async {
-                final result = await context.push('/add-item/$topicIndex');
-                if (result != null && result is Item) {
-                  onAddItem(topicIndex, result);
-                }
-              },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('Adicionar Item'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange[800],
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () async {
+                    final result = await context.push('/add-item/$topicIndex');
+                    if (result != null && result is Item) {
+                      onAddItem(topicIndex, result);
+                    }
+                  },
+                ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.edit_note),
+                  label: const Text('Editar Tópico'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.teal[400],
+                    side: BorderSide(color: Colors.teal[400]!),
+                  ),
+                  onPressed: () async {
+                    final result = await context.push(
+                      '/edit-topic/$topicIndex',
+                      extra: topic.name,
+                    );
+                    if (result != null &&
+                        result is Map &&
+                        result['name'] != null) {
+                      onEditTopic(topicIndex, result['name'] as String);
+                    }
+                  },
+                ),
+              ],
             ),
           ),
         ],

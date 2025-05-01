@@ -12,7 +12,9 @@ class AddTopic extends StatefulWidget {
 }
 
 class _AddTopicState extends State<AddTopic> {
+  final _formKey = GlobalKey<FormState>();
   late TextEditingController nameController;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -26,16 +28,14 @@ class _AddTopicState extends State<AddTopic> {
     super.dispose();
   }
 
-  void _submit() {
-    final name = nameController.text.trim();
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('O nome é obrigatório')));
-      return;
+  void _submit() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => isLoading = true);
+      await Future.delayed(const Duration(seconds: 1));
+      final name = nameController.text.trim();
+      context.pop({'name': name, 'index': widget.topicIndex});
+      setState(() => isLoading = false);
     }
-
-    context.pop({'name': name, 'index': widget.topicIndex});
   }
 
   @override
@@ -48,36 +48,67 @@ class _AddTopicState extends State<AddTopic> {
         backgroundColor: Colors.teal[900],
       ),
       backgroundColor: Colors.grey[900],
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Nome do Tópico',
-                labelStyle: const TextStyle(color: Colors.white70),
-                border: const OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.teal[400]!),
-                ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: nameController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Nome do Tópico',
+                      labelStyle: const TextStyle(color: Colors.white70),
+                      border: const OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.teal[400]!),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'O nome é obrigatório';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: isLoading ? null : () => context.pop(),
+                        child: const Text('Cancelar'),
+                      ),
+                      ElevatedButton(
+                        onPressed: isLoading ? null : _submit,
+                        child:
+                            isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                : const Text('Salvar'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => context.pop(),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(onPressed: _submit, child: const Text('Salvar')),
-              ],
+          ),
+          if (isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(child: CircularProgressIndicator()),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
