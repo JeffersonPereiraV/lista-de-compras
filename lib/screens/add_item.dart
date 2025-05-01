@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../models/app_state.dart';
 import '../models/item.dart';
 
 class AddItem extends StatefulWidget {
@@ -26,24 +28,33 @@ class _AddItemState extends State<AddItem> {
     super.dispose();
   }
 
-  void _submit() async {
+  void _submit(BuildContext context, AppState appState) async {
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);
       await Future.delayed(const Duration(seconds: 1));
-      final name = nameController.text.trim();
-      final description = descriptionController.text.trim();
-      final price = double.tryParse(priceController.text) ?? 0.0;
-
-      context.pop(Item(name: name, description: description, price: price));
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Item "$name" adicionado')));
-      setState(() => isLoading = false);
+      try {
+        final name = nameController.text.trim();
+        final description = descriptionController.text.trim();
+        final price = double.tryParse(priceController.text) ?? 0.0;
+        final item = Item(name: name, description: description, price: price);
+        await appState.addItem(widget.topicIndex, item);
+        context.pop();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Item "$name" adicionado')));
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao adicionar item: $e')));
+      } finally {
+        setState(() => isLoading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Novo Item'),
@@ -124,7 +135,8 @@ class _AddItemState extends State<AddItem> {
                         child: const Text('Cancelar'),
                       ),
                       ElevatedButton(
-                        onPressed: isLoading ? null : _submit,
+                        onPressed:
+                            isLoading ? null : () => _submit(context, appState),
                         child:
                             isLoading
                                 ? const SizedBox(

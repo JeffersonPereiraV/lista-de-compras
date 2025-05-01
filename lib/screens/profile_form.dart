@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/user.dart';
-import '../services/storage.dart';
+import 'package:provider/provider.dart';
+import '../models/app_state.dart';
 
 class ProfileForm extends StatefulWidget {
   const ProfileForm({super.key});
@@ -12,21 +12,15 @@ class ProfileForm extends StatefulWidget {
 class _ProfileFormState extends State<ProfileForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController nameController;
-  String? selectedCurrency = 'BRL';
+  String? selectedCurrency;
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadUser();
-  }
-
-  Future<void> _loadUser() async {
-    final user = await Storage.loadUser();
-    setState(() {
-      nameController = TextEditingController(text: user.name);
-      selectedCurrency = user.currency;
-    });
+    final appState = Provider.of<AppState>(context, listen: false);
+    nameController = TextEditingController(text: appState.user.name);
+    selectedCurrency = appState.user.currency;
   }
 
   @override
@@ -35,25 +29,32 @@ class _ProfileFormState extends State<ProfileForm> {
     super.dispose();
   }
 
-  void _submit() async {
+  void _submit(BuildContext context, AppState appState) async {
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);
-      await Future.delayed(const Duration(seconds: 1));
-      final user = User(
-        name: nameController.text.trim(),
-        currency: selectedCurrency!,
-      );
-      await Storage.saveUser(user);
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Perfil atualizado com sucesso')),
-      );
-      Navigator.pop(context);
+      await Future.delayed(const Duration(seconds: 1)); // Simula processamento
+      try {
+        await appState.updateUser(
+          nameController.text.trim(),
+          selectedCurrency!,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Perfil atualizado com sucesso')),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao atualizar perfil: $e')));
+      } finally {
+        setState(() => isLoading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar Perfil'),
@@ -134,7 +135,8 @@ class _ProfileFormState extends State<ProfileForm> {
                         child: const Text('Cancelar'),
                       ),
                       ElevatedButton(
-                        onPressed: isLoading ? null : _submit,
+                        onPressed:
+                            isLoading ? null : () => _submit(context, appState),
                         child:
                             isLoading
                                 ? const SizedBox(

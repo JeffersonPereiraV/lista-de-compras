@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../models/app_state.dart';
 
 class AddTopic extends StatefulWidget {
   final int? topicIndex;
@@ -28,18 +30,40 @@ class _AddTopicState extends State<AddTopic> {
     super.dispose();
   }
 
-  void _submit() async {
+  void _submit(BuildContext context, AppState appState) async {
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);
       await Future.delayed(const Duration(seconds: 1));
-      final name = nameController.text.trim();
-      context.pop({'name': name, 'index': widget.topicIndex});
-      setState(() => isLoading = false);
+      try {
+        final name = nameController.text.trim();
+        if (widget.topicIndex != null) {
+          await appState.editTopicName(widget.topicIndex!, name);
+        } else {
+          await appState.addTopic(name);
+        }
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.topicIndex != null
+                  ? 'Tópico "$name" atualizado'
+                  : 'Tópico "$name" adicionado',
+            ),
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao salvar tópico: $e')));
+      } finally {
+        setState(() => isLoading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -84,7 +108,8 @@ class _AddTopicState extends State<AddTopic> {
                         child: const Text('Cancelar'),
                       ),
                       ElevatedButton(
-                        onPressed: isLoading ? null : _submit,
+                        onPressed:
+                            isLoading ? null : () => _submit(context, appState),
                         child:
                             isLoading
                                 ? const SizedBox(

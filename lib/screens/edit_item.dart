@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../models/app_state.dart';
 import '../models/item.dart';
 
 class EditItem extends StatefulWidget {
@@ -45,31 +47,42 @@ class _EditItemState extends State<EditItem> {
     super.dispose();
   }
 
-  void _submit() async {
+  void _submit(BuildContext context, AppState appState) async {
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);
       await Future.delayed(const Duration(seconds: 1));
-      final name = nameController.text.trim();
-      final description = descriptionController.text.trim();
-      final price = double.tryParse(priceController.text) ?? 0.0;
-
-      context.pop(
-        Item(
+      try {
+        final name = nameController.text.trim();
+        final description = descriptionController.text.trim();
+        final price = double.tryParse(priceController.text) ?? 0.0;
+        final updatedItem = Item(
           name: name,
           description: description,
           price: price,
           checked: widget.item.checked,
-        ),
-      );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Item "$name" atualizado')));
-      setState(() => isLoading = false);
+        );
+        await appState.editItem(
+          widget.topicIndex,
+          widget.itemIndex,
+          updatedItem,
+        );
+        context.pop();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Item "$name" atualizado')));
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao editar item: $e')));
+      } finally {
+        setState(() => isLoading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar Item'),
@@ -150,7 +163,8 @@ class _EditItemState extends State<EditItem> {
                         child: const Text('Cancelar'),
                       ),
                       ElevatedButton(
-                        onPressed: isLoading ? null : _submit,
+                        onPressed:
+                            isLoading ? null : () => _submit(context, appState),
                         child:
                             isLoading
                                 ? const SizedBox(
