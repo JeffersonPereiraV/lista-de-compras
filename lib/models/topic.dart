@@ -1,10 +1,19 @@
 import 'item.dart';
 
 class Topic {
-  String name;
-  List<Item> items;
+  final String name;
+  final List<Item> items;
 
-  Topic({required this.name, required this.items});
+  Topic({required String name, required List<Item> items})
+    : name = name.trim(),
+      items = List.unmodifiable(items) {
+    if (name.isEmpty)
+      throw ArgumentError('O nome do tópico não pode ser vazio');
+  }
+
+  Topic copyWith({String? name, List<Item>? items}) {
+    return Topic(name: name ?? this.name, items: items ?? this.items);
+  }
 
   factory Topic.fromJson(Map<String, dynamic> json) {
     return Topic(

@@ -53,30 +53,59 @@ class _HomeState extends State<Home> {
   }
 
   void _addTopic(String name) {
-    setState(() {
-      topics.add(Topic(name: name, items: []));
-      _saveData();
-    });
+    try {
+      setState(() {
+        topics = [...topics, Topic(name: name, items: [])];
+        _saveData();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao adicionar tópico: $e')));
+    }
   }
 
   void _editTopicName(int index, String name) {
-    setState(() {
-      topics[index].name = name;
-      _saveData();
-    });
+    try {
+      setState(() {
+        final updatedTopic = topics[index].copyWith(name: name);
+        topics = [
+          ...topics.take(index),
+          updatedTopic,
+          ...topics.skip(index + 1),
+        ];
+        _saveData();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao editar tópico: $e')));
+    }
   }
 
   void _deleteTopic(int index) {
     setState(() {
-      topics.removeAt(index);
+      topics = [...topics.take(index), ...topics.skip(index + 1)];
       _saveData();
     });
   }
 
   void _toggleItemChecked(int topicIndex, int itemIndex) {
     setState(() {
-      final item = topics[topicIndex].items[itemIndex];
-      item.checked = !item.checked;
+      final topic = topics[topicIndex];
+      final item = topic.items[itemIndex];
+      final updatedItem = item.copyWith(checked: !item.checked);
+      final newItems = [
+        ...topic.items.take(itemIndex),
+        updatedItem,
+        ...topic.items.skip(itemIndex + 1),
+      ];
+      final updatedTopic = topic.copyWith(items: newItems);
+      topics = [
+        ...topics.take(topicIndex),
+        updatedTopic,
+        ...topics.skip(topicIndex + 1),
+      ];
       _saveData();
     });
   }
@@ -84,32 +113,63 @@ class _HomeState extends State<Home> {
   void _toggleAllItemsChecked() {
     setState(() {
       allChecked = !allChecked;
-      for (var topic in topics) {
-        for (var item in topic.items) {
-          item.checked = allChecked;
-        }
-      }
+      topics =
+          topics.map((topic) {
+            final newItems =
+                topic.items
+                    .map((item) => item.copyWith(checked: allChecked))
+                    .toList();
+            return topic.copyWith(items: newItems);
+          }).toList();
       _saveData();
     });
   }
 
   void _addItem(int topicIndex, Item item) {
     setState(() {
-      topics[topicIndex].items.add(item);
+      final topic = topics[topicIndex];
+      final newItems = [...topic.items, item];
+      final updatedTopic = topic.copyWith(items: newItems);
+      topics = [
+        ...topics.take(topicIndex),
+        updatedTopic,
+        ...topics.skip(topicIndex + 1),
+      ];
       _saveData();
     });
   }
 
   void _editItem(int topicIndex, int itemIndex, Item item) {
     setState(() {
-      topics[topicIndex].items[itemIndex] = item;
+      final topic = topics[topicIndex];
+      final newItems = [
+        ...topic.items.take(itemIndex),
+        item,
+        ...topic.items.skip(itemIndex + 1),
+      ];
+      final updatedTopic = topic.copyWith(items: newItems);
+      topics = [
+        ...topics.take(topicIndex),
+        updatedTopic,
+        ...topics.skip(topicIndex + 1),
+      ];
       _saveData();
     });
   }
 
   void _deleteItem(int topicIndex, int itemIndex) {
     setState(() {
-      topics[topicIndex].items.removeAt(itemIndex);
+      final topic = topics[topicIndex];
+      final newItems = [
+        ...topic.items.take(itemIndex),
+        ...topic.items.skip(itemIndex + 1),
+      ];
+      final updatedTopic = topic.copyWith(items: newItems);
+      topics = [
+        ...topics.take(topicIndex),
+        updatedTopic,
+        ...topics.skip(topicIndex + 1),
+      ];
       _saveData();
     });
   }
