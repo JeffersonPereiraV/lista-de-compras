@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../models/app_state.dart';
 import '../models/topic.dart';
+import '../models/item.dart';
 import 'item_tile.dart';
 
 class TopicCard extends StatelessWidget {
@@ -10,10 +11,6 @@ class TopicCard extends StatelessWidget {
   final int topicIndex;
 
   const TopicCard({super.key, required this.topic, required this.topicIndex});
-
-  double _calculateTopicTotal() {
-    return topic.items.fold(0.0, (sum, item) => sum + item.price);
-  }
 
   void _confirmDelete(BuildContext context, AppState appState) {
     showDialog(
@@ -45,7 +42,7 @@ class TopicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
+    final appState = Provider.of<AppState>(context, listen: false);
     return Card(
       margin: const EdgeInsets.all(8),
       child: ExpansionTile(
@@ -62,13 +59,19 @@ class TopicCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              'Subtotal: R\$ ${_calculateTopicTotal().toStringAsFixed(2)}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[400],
-                fontStyle: FontStyle.italic,
-              ),
+            Selector<AppState, double>(
+              selector:
+                  (_, appState) =>
+                      topic.items.fold(0.0, (sum, item) => sum + item.price),
+              builder:
+                  (_, total, __) => Text(
+                    'Subtotal: R\$ ${total.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[400],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
             ),
           ],
         ),
@@ -103,12 +106,24 @@ class TopicCard extends StatelessWidget {
           ],
         ),
         children: [
-          for (int itemIndex = 0; itemIndex < topic.items.length; itemIndex++)
-            ItemTile(
-              item: topic.items[itemIndex],
-              topicIndex: topicIndex,
-              itemIndex: itemIndex,
-            ),
+          Selector<AppState, List<Item>>(
+            selector: (_, appState) => appState.topics[topicIndex].items,
+            builder:
+                (_, items, __) => Column(
+                  children: [
+                    for (
+                      int itemIndex = 0;
+                      itemIndex < items.length;
+                      itemIndex++
+                    )
+                      ItemTile(
+                        item: items[itemIndex],
+                        topicIndex: topicIndex,
+                        itemIndex: itemIndex,
+                      ),
+                  ],
+                ),
+          ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
