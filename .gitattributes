@@ -1,0 +1,18 @@
+# Arquivos de código e configurações devem usar LF
+*.dart text eol=lf
+*.yaml text eol=lf
+*.cc text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.c text eol=lf
+
+# Arquivos de texto genéricos usam terminações nativas
+*.txt text
+
+# Arquivos binários não devem ser modificados
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
