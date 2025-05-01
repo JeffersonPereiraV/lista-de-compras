@@ -19,6 +19,7 @@ class _HomeState extends State<Home> {
   bool allChecked = false;
   String topicSearchQuery = '';
   String itemSearchQuery = '';
+  String? selectedCurrency;
 
   @override
   void initState() {
@@ -38,8 +39,16 @@ class _HomeState extends State<Home> {
 
   void _updateFilteredTopics() {
     setState(() {
-      final topicFiltered = Search.searchTopics(topics, topicSearchQuery);
-      filteredTopics = Search.searchItems(topicFiltered, itemSearchQuery);
+      final topicFiltered = Search.searchTopics(
+        topics,
+        topicSearchQuery,
+        currency: selectedCurrency,
+      );
+      filteredTopics = Search.searchItems(
+        topicFiltered,
+        itemSearchQuery,
+        currency: selectedCurrency,
+      );
     });
   }
 
@@ -113,6 +122,85 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[850],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder:
+          (context) => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Filtrar por Moeda',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButton<String>(
+                  value: selectedCurrency,
+                  hint: const Text(
+                    'Selecione a moeda',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  isExpanded: true,
+                  dropdownColor: Colors.grey[850],
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text(
+                        'Todas',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const DropdownMenuItem<String>(
+                      value: 'BRL',
+                      child: Text(
+                        'Real (BRL)',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const DropdownMenuItem<String>(
+                      value: 'USD',
+                      child: Text(
+                        'Dólar (USD)',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCurrency = value;
+                      _updateFilteredTopics();
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      selectedCurrency = null;
+                      _updateFilteredTopics();
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Limpar Filtro'),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,6 +227,11 @@ class _HomeState extends State<Home> {
             onPressed: _toggleAllItemsChecked,
             tooltip: allChecked ? 'Desmarcar Todos' : 'Marcar Todos',
           ),
+          IconButton(
+            icon: const Icon(Icons.person, color: Colors.white),
+            onPressed: () => context.push('/profile'),
+            tooltip: 'Editar Perfil',
+          ),
         ],
       ),
       body: Column(
@@ -151,14 +244,18 @@ class _HomeState extends State<Home> {
                 _updateFilteredTopics();
               },
               style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Buscar tópicos...',
-                hintStyle: TextStyle(color: Colors.white70),
-                prefixIcon: Icon(Icons.category, color: Colors.teal),
-                border: OutlineInputBorder(
+                hintStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.category, color: Colors.teal),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.filter_list, color: Colors.teal),
+                  onPressed: _showFilterBottomSheet,
+                ),
+                border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
-                focusedBorder: OutlineInputBorder(
+                focusedBorder: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                   borderSide: BorderSide(color: Colors.teal),
                 ),
@@ -188,22 +285,30 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: filteredTopics.length,
-              itemBuilder: (context, topicIndex) {
-                final topic = filteredTopics[topicIndex];
-                return TopicCard(
-                  topic: topic,
-                  topicIndex: topicIndex,
-                  onToggleItem: _toggleItemChecked,
-                  onDeleteTopic: _deleteTopic,
-                  onEditTopic: _editTopicName,
-                  onAddItem: _addItem,
-                  onEditItem: _editItem,
-                  onDeleteItem: _deleteItem,
-                );
-              },
-            ),
+            child:
+                filteredTopics.isEmpty
+                    ? const Center(
+                      child: Text(
+                        'Nenhum resultado encontrado',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                    )
+                    : ListView.builder(
+                      itemCount: filteredTopics.length,
+                      itemBuilder: (context, topicIndex) {
+                        final topic = filteredTopics[topicIndex];
+                        return TopicCard(
+                          topic: topic,
+                          topicIndex: topicIndex,
+                          onToggleItem: _toggleItemChecked,
+                          onDeleteTopic: _deleteTopic,
+                          onEditTopic: _editTopicName,
+                          onAddItem: _addItem,
+                          onEditItem: _editItem,
+                          onDeleteItem: _deleteItem,
+                        );
+                      },
+                    ),
           ),
         ],
       ),
@@ -214,6 +319,9 @@ class _HomeState extends State<Home> {
           final result = await context.push('/add-topic');
           if (result != null && result is Map && result['name'] != null) {
             _addTopic(result['name'] as String);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Tópico "${result['name']}" adicionado')),
+            );
           }
         },
         child: const Icon(Icons.add),

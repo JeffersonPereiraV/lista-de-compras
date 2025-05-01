@@ -1,56 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'screens/home.dart';
-import 'screens/add_item.dart';
-import 'screens/edit_item.dart';
-import 'screens/add_topic.dart';
-import 'models/item.dart';
+import 'services/routes.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
-  final GoRouter _router = GoRouter(
-    initialLocation: '/',
-    routes: [
-      GoRoute(path: '/', builder: (context, state) => const Home()),
-      GoRoute(
-        path: '/add-item/:topicIndex',
-        builder: (context, state) {
-          final topicIndex = int.parse(state.pathParameters['topicIndex']!);
-          return AddItem(topicIndex: topicIndex);
-        },
-      ),
-      GoRoute(
-        path: '/edit-item/:topicIndex/:itemIndex',
-        builder: (context, state) {
-          final topicIndex = int.parse(state.pathParameters['topicIndex']!);
-          final itemIndex = int.parse(state.pathParameters['itemIndex']!);
-          final item = state.extra as Item;
-          return EditItem(
-            topicIndex: topicIndex,
-            itemIndex: itemIndex,
-            item: item,
-          );
-        },
-      ),
-      GoRoute(
-        path: '/add-topic',
-        builder: (context, state) => const AddTopic(),
-      ),
-      GoRoute(
-        path: '/edit-topic/:topicIndex',
-        builder: (context, state) {
-          final topicIndex = int.parse(state.pathParameters['topicIndex']!);
-          final topicName = state.extra as String;
-          return AddTopic(topicIndex: topicIndex, initialName: topicName);
-        },
-      ),
-    ],
-  );
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +45,7 @@ class MyApp extends StatelessWidget {
           titleLarge: TextStyle(color: Colors.white),
         ),
       ),
-      routerConfig: _router,
+      routerConfig: AppRoutes.router,
     );
   }
 }
