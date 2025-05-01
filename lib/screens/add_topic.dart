@@ -63,7 +63,7 @@ class _AddTopicState extends State<AddTopic> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
+    final appState = Provider.of<AppState>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text(

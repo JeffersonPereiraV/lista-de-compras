@@ -32,7 +32,7 @@ class _ProfileFormState extends State<ProfileForm> {
   void _submit(BuildContext context, AppState appState) async {
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);
-      await Future.delayed(const Duration(seconds: 1)); // Simula processamento
+      await Future.delayed(const Duration(seconds: 1));
       try {
         await appState.updateUser(
           nameController.text.trim(),
@@ -54,7 +54,7 @@ class _ProfileFormState extends State<ProfileForm> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
+    final appState = Provider.of<AppState>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar Perfil'),
@@ -95,35 +95,45 @@ class _ProfileFormState extends State<ProfileForm> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: selectedCurrency,
-                    decoration: InputDecoration(
-                      labelText: 'Moeda Preferida',
-                      labelStyle: const TextStyle(color: Colors.white70),
-                      border: const OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal[400]!),
-                      ),
-                    ),
-                    dropdownColor: Colors.grey[850],
-                    style: const TextStyle(color: Colors.white),
-                    items: const [
-                      DropdownMenuItem(value: 'BRL', child: Text('Real (BRL)')),
-                      DropdownMenuItem(
-                        value: 'USD',
-                        child: Text('Dólar (USD)'),
-                      ),
-                      DropdownMenuItem(value: 'EUR', child: Text('Euro (EUR)')),
-                    ],
-                    onChanged: (value) {
-                      setState(() => selectedCurrency = value);
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Selecione uma moeda';
-                      }
-                      return null;
-                    },
+                  Selector<AppState, String>(
+                    selector: (_, appState) => appState.user.currency,
+                    builder:
+                        (_, currency, __) => DropdownButtonFormField<String>(
+                          value: selectedCurrency ?? currency,
+                          decoration: InputDecoration(
+                            labelText: 'Moeda Preferida',
+                            labelStyle: const TextStyle(color: Colors.white70),
+                            border: const OutlineInputBorder(),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.teal[400]!),
+                            ),
+                          ),
+                          dropdownColor: Colors.grey[850],
+                          style: const TextStyle(color: Colors.white),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'BRL',
+                              child: Text('Real (BRL)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'USD',
+                              child: Text('Dólar (USD)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'EUR',
+                              child: Text('Euro (EUR)'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() => selectedCurrency = value);
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Selecione uma moeda';
+                            }
+                            return null;
+                          },
+                        ),
                   ),
                   const SizedBox(height: 16),
                   Row(
