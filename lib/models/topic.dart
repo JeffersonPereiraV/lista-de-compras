@@ -6,7 +6,7 @@ class Topic {
 
   Topic({required String name, required List<Item> items})
     : name = name.trim(),
-      items = List.unmodifiable(items) {
+      items = items {
     if (name.isEmpty)
       throw ArgumentError('O nome do tópico não pode ser vazio');
   }
@@ -19,7 +19,9 @@ class Topic {
     return Topic(
       name: json['name'],
       items:
-          (json['items'] as List).map((item) => Item.fromJson(item)).toList(),
+          (json['items'] as List<dynamic>)
+              .map((itemJson) => Item.fromJson(itemJson))
+              .toList(),
     );
   }
 
