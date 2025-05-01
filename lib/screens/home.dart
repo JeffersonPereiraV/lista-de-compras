@@ -109,7 +109,7 @@ class Home extends StatelessWidget {
                   ),
               builder:
                   (_, totalPrice, __) => Text(
-                    'Total: R\$ ${totalPrice.toStringAsFixed(2)}',
+                    'Total: ${appState.user.currency} ${totalPrice.toStringAsFixed(2)}',
                     style: const TextStyle(fontSize: 14, color: Colors.white70),
                   ),
             ),
@@ -229,7 +229,7 @@ class Home extends StatelessWidget {
                               final topic = filteredTopics[topicIndex];
                               return TopicCard(
                                 topic: topic,
-                                topicIndex: topicIndex,
+                                topicIndex: appState.topics.indexOf(topic),
                               );
                             },
                           ),

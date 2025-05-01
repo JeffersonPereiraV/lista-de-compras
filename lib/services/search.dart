@@ -6,14 +6,12 @@ class Search {
     String query, {
     String? currency,
   }) {
-    if (query.isEmpty && currency == null) return topics;
+    final lowerQuery = query.toLowerCase();
     return topics.where((topic) {
-      final matchesQuery =
-          query.isEmpty ||
-          topic.name.toLowerCase().contains(query.toLowerCase());
+      final matchesName = topic.name.toLowerCase().contains(lowerQuery);
       final matchesCurrency =
-          currency == null || topic.items.any((item) => item.price > 0);
-      return matchesQuery && matchesCurrency;
+          currency == null || topic.items.any((item) => true);
+      return matchesName && matchesCurrency;
     }).toList();
   }
 
@@ -22,20 +20,18 @@ class Search {
     String query, {
     String? currency,
   }) {
-    if (query.isEmpty && currency == null) return topics;
-
+    final lowerQuery = query.toLowerCase();
     return topics
         .map((topic) {
           final filteredItems =
               topic.items.where((item) {
-                final matchesQuery =
-                    query.isEmpty ||
-                    item.name.toLowerCase().contains(query.toLowerCase()) ||
-                    item.description.toLowerCase().contains(
-                      query.toLowerCase(),
-                    );
-                final matchesCurrency = currency == null || item.price > 0;
-                return matchesQuery && matchesCurrency;
+                final matchesName = item.name.toLowerCase().contains(
+                  lowerQuery,
+                );
+                final matchesDescription = item.description
+                    .toLowerCase()
+                    .contains(lowerQuery);
+                return matchesName || matchesDescription;
               }).toList();
           return Topic(name: topic.name, items: filteredItems);
         })
