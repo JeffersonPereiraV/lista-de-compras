@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../models/app_state.dart';
 import '../models/item.dart';
 
 class ItemTile extends StatelessWidget {
   final Item item;
   final int topicIndex;
   final int itemIndex;
-  final Function(int, int) onToggle;
-  final Function(int, int, Item) onEdit;
-  final Function(int, int) onDelete;
 
   const ItemTile({
     super.key,
     required this.item,
     required this.topicIndex,
     required this.itemIndex,
-    required this.onToggle,
-    required this.onEdit,
-    required this.onDelete,
   });
 
-  void _confirmDelete(BuildContext context) {
+  void _confirmDelete(BuildContext context, AppState appState) {
     showDialog(
       context: context,
       builder:
@@ -35,7 +31,7 @@ class ItemTile extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  onDelete(topicIndex, itemIndex);
+                  appState.deleteItem(topicIndex, itemIndex);
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -50,6 +46,7 @@ class ItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
     return Dismissible(
       key: Key('${topicIndex}_$itemIndex'),
       direction: DismissDirection.endToStart,
@@ -60,15 +57,15 @@ class ItemTile extends StatelessWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       confirmDismiss: (direction) async {
-        _confirmDelete(context);
-        return false;
+        _confirmDelete(context, appState);
+        return false; // Controlado pelo diálogo
       },
       child: ListTile(
         leading: Checkbox(
           value: item.checked,
           activeColor: Colors.teal[400],
           checkColor: Colors.grey[900],
-          onChanged: (_) => onToggle(topicIndex, itemIndex),
+          onChanged: (_) => appState.toggleItemChecked(topicIndex, itemIndex),
         ),
         title: Text(
           item.name,
@@ -97,18 +94,15 @@ class ItemTile extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.edit, color: Colors.deepOrange[400]),
               onPressed: () async {
-                final result = await context.push(
+                await context.push(
                   '/edit-item/$topicIndex/$itemIndex',
                   extra: item,
                 );
-                if (result != null && result is Item) {
-                  onEdit(topicIndex, itemIndex, result);
-                }
               },
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red[900]),
-              onPressed: () => _confirmDelete(context),
+              onPressed: () => _confirmDelete(context, appState),
             ),
           ],
         ),

@@ -1,36 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../models/item.dart';
+import 'package:provider/provider.dart';
+import '../models/app_state.dart';
 import '../models/topic.dart';
 import 'item_tile.dart';
 
 class TopicCard extends StatelessWidget {
   final Topic topic;
   final int topicIndex;
-  final Function(int, int) onToggleItem;
-  final Function(int) onDeleteTopic;
-  final Function(int, String) onEditTopic;
-  final Function(int, Item) onAddItem;
-  final Function(int, int, Item) onEditItem;
-  final Function(int, int) onDeleteItem;
 
-  const TopicCard({
-    super.key,
-    required this.topic,
-    required this.topicIndex,
-    required this.onToggleItem,
-    required this.onDeleteTopic,
-    required this.onEditTopic,
-    required this.onAddItem,
-    required this.onEditItem,
-    required this.onDeleteItem,
-  });
+  const TopicCard({super.key, required this.topic, required this.topicIndex});
 
   double _calculateTopicTotal() {
     return topic.items.fold(0.0, (sum, item) => sum + item.price);
   }
 
-  void _confirmDelete(BuildContext context) {
+  void _confirmDelete(BuildContext context, AppState appState) {
     showDialog(
       context: context,
       builder:
@@ -45,7 +30,7 @@ class TopicCard extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  onDeleteTopic(topicIndex);
+                  appState.deleteTopic(topicIndex);
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -60,6 +45,7 @@ class TopicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
     return Card(
       margin: const EdgeInsets.all(8),
       child: ExpansionTile(
@@ -97,13 +83,22 @@ class TopicCard extends StatelessWidget {
                   extra: topic.name,
                 );
                 if (result != null && result is Map && result['name'] != null) {
-                  onEditTopic(topicIndex, result['name'] as String);
+                  try {
+                    await appState.editTopicName(
+                      topicIndex,
+                      result['name'] as String,
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erro ao editar tópico: $e')),
+                    );
+                  }
                 }
               },
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red[900]),
-              onPressed: () => _confirmDelete(context),
+              onPressed: () => _confirmDelete(context, appState),
             ),
           ],
         ),
@@ -113,9 +108,6 @@ class TopicCard extends StatelessWidget {
               item: topic.items[itemIndex],
               topicIndex: topicIndex,
               itemIndex: itemIndex,
-              onToggle: onToggleItem,
-              onEdit: onEditItem,
-              onDelete: onDeleteItem,
             ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -130,10 +122,7 @@ class TopicCard extends StatelessWidget {
                     foregroundColor: Colors.white,
                   ),
                   onPressed: () async {
-                    final result = await context.push('/add-item/$topicIndex');
-                    if (result != null && result is Item) {
-                      onAddItem(topicIndex, result);
-                    }
+                    await context.push('/add-item/$topicIndex');
                   },
                 ),
                 OutlinedButton.icon(
@@ -151,7 +140,16 @@ class TopicCard extends StatelessWidget {
                     if (result != null &&
                         result is Map &&
                         result['name'] != null) {
-                      onEditTopic(topicIndex, result['name'] as String);
+                      try {
+                        await appState.editTopicName(
+                          topicIndex,
+                          result['name'] as String,
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Erro ao editar tópico: $e')),
+                        );
+                      }
                     }
                   },
                 ),
