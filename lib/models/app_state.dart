@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'item.dart';
-import 'topic.dart';
-import 'user.dart';
+import 'topic/topic.dart';
+import 'user/user.dart';
 import '../services/storage.dart';
 
 class AppState extends ChangeNotifier {

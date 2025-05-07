@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../models/app_state.dart';
-import '../models/topic.dart';
+import '../models/topic/topic.dart';
 import '../models/item.dart';
 import 'item_tile.dart';
 

@@ -4,8 +4,8 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soft_list/models/item.dart';
-import 'package:soft_list/models/topic.dart';
-import 'package:soft_list/models/user.dart';
+import 'package:soft_list/models/topic/topic.dart';
+import 'package:soft_list/models/user/user.dart';
 import 'package:soft_list/services/storage.dart';
 
 import 'storage_test.mocks.dart';

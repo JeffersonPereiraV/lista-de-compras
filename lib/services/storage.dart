@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/topic.dart';
-import '../models/user.dart';
+import '../models/topic/topic.dart';
+import '../models/user/user.dart';
 
 class Storage {
   static Future<List<Topic>> loadTopics() async {
