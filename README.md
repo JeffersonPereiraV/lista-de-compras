@@ -49,10 +49,12 @@ O projeto segue uma estrutura modular e simples para facilitar a manutenção e 
 
 ### 🔹 Organização de Pastas
 
-`````text
+```text
 ## Estrutura do Projeto
 
-A estrutura do projeto foi organizada para garantir uma boa manutenção e escalabilidade, com uma separação clara de responsabilidades entre os modelos de dados, serviços e a entrada principal do aplicativo. Abaixo está a explicação das pastas e arquivos principais:
+A estrutura do projeto foi organizada para garantir uma boa manutenção e escalabilidade,
+ com uma separação clara de responsabilidades entre os modelos de dados, serviços e a entrada principal do aplicativo.
+  Abaixo está a explicação das pastas e arquivos principais:
 
 lib/
 ├── models/ # Contém os modelos de dados do aplicativo (User, Topic, Item)
@@ -62,7 +64,7 @@ lib/
 ├── services/ # Contém serviços utilitários, como persistência de dados (storage.dart)
 │ └── storage.dart # Serviço responsável pela manipulação e persistência de dados locais (SharedPreferences)
 └── main.dart # Arquivo principal, responsável pela execução do app e configuração inicial
-
+```
 
 ⚙️ Requisitos
 Flutter: 3.x ou superior
@@ -76,9 +78,10 @@ Dependência principal: shared_preferences
 🚀 Instalação
 Abra o terminal e execute:
 
-````bash
+```bash
 flutter pub get
 flutter run
+```
 
 🧭 Como Usar
 ➕ Adicionar um Tópico
@@ -108,4 +111,7 @@ Filtro inferior: busca por nome ou descrição do item.
 
 📁 Estrutura do Código
 A estrutura do projeto foi organizada para facilitar manutenção e escalabilidade, seguindo boas práticas de desenvolvimento mobile com Flutter.
-`````
+
+```
+
+```
