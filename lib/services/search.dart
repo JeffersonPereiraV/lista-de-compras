@@ -1,4 +1,4 @@
-import '../models/topic.dart';
+import '../models/topic/topic.dart';
 
 class Search {
   static List<Topic> searchTopics(

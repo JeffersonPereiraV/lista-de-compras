@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:soft_list/models/app_state.dart';
 import 'package:soft_list/models/item.dart';
-import 'package:soft_list/models/topic.dart';
+import 'package:soft_list/models/topic/topic.dart';
 import 'package:soft_list/widgets/topic_card.dart';
 
 void main() {

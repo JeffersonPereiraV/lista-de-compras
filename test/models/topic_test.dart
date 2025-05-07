@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soft_list/models/item.dart';
-import 'package:soft_list/models/topic.dart';
+import 'package:soft_list/models/topic/topic.dart';
 
 void main() {
   group('Topic Unit Tests', () {
