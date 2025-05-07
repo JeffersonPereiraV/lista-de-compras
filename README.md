@@ -66,8 +66,9 @@ lib/
 └── main.dart # Arquivo principal, responsável pela execução do app e configuração inicial
 ```
 
-⚙️ Requisitos
-Flutter: 3.x ou superior
+## ⚙️ Requisitos
+
+### Flutter: 3.x ou superior
 
 Dart: 2.x ou superior
 
@@ -75,7 +76,8 @@ Dispositivo: Android, iOS ou emulador
 
 Dependência principal: shared_preferences
 
-🚀 Instalação
+## 🚀 Instalação
+
 Abra o terminal e execute:
 
 ```bash
@@ -83,35 +85,37 @@ flutter pub get
 flutter run
 ```
 
-🧭 Como Usar
+## 🧭 Como Usar
+
 ➕ Adicionar um Tópico
 Toque no botão flutuante ( + ).
 
 Digite o nome do tópico e clique em "Salvar".
 
-📝 Adicionar um Item
+## 📝 Adicionar um Item
+
 Expanda um tópico.
 
 Toque em "Adicionar Item", preencha os dados e clique em "Adicionar".
 
-✏️ Editar ou Excluir
+## ✏️ Editar ou Excluir
+
 Use o ícone de lápis para editar.
 
 Use o ícone de lixeira para excluir.
 
-✅ Marcar Concluído
+## ✅ Marcar Concluído
+
 Toque na caixa de seleção (checkbox) ao lado de cada item.
 
 Use o botão no topo direito para marcar ou desmarcar todos os itens de uma vez.
 
-🔍 Buscar
+## 🔍 Buscar
+
 Filtro superior: busca por nome do tópico.
 
 Filtro inferior: busca por nome ou descrição do item.
 
-📁 Estrutura do Código
+## 📁 Estrutura do Código
+
 A estrutura do projeto foi organizada para facilitar manutenção e escalabilidade, seguindo boas práticas de desenvolvimento mobile com Flutter.
-
-```
-
-```
