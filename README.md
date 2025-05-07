@@ -23,33 +23,46 @@ A _Lista de Compras_ foi criada para facilitar o planejamento de compras, permit
 - **Cálculo automático**: Subtotal por tópico + total geral em tempo real.
 - **Busca inteligente**: Filtros independentes para tópicos e itens.
 - **Tema escuro**: Interface moderna com cores em teal e laranja escuro.
-- **Persistência local**: Dados armazenados com [`shared_preferences`](https://pub.dev/packages/shared_preferences).
+- **Persistência local**: Dados armazenados com [`shared_preferences`].
 
 ---
 
 ## 🧠 Arquitetura Aplicada
 
-O projeto segue uma estrutura modular e limpa:
+O projeto segue uma estrutura modular e simples para facilitar a manutenção e o entendimento do código. Abaixo estão os principais componentes do projeto:
 
-### 🔹 SharedPreferences
+### 🔹 **SharedPreferences**
 
-- Serviço centralizado (`storage.dart`) para configurações do usuário;
-- Suporte a preferências como tema e idioma.
+- **Serviço centralizado** (`storage.dart`): Gerencia as preferências do usuário e a persistência de dados localmente utilizando `SharedPreferences`.
+- **Preferências suportadas**: Armazenamento de configurações como tema (modo escuro/claro) e idioma, além de dados específicos do usuário e tópicos.
 
-### 🔹 Repository Pattern
+### 🔹 **Modelos de Dados**
 
-- DAOs para acesso local aos dados (`user_dao.dart`, `topic_dao.dart`);
-- Repositórios intermediários (`user_repository.dart`, `topic_repository.dart`) para desacoplar lógica de negócio da camada de dados.
+- **User** (`user.dart`): Representa as informações do usuário, como `name` e `currency`. A conversão entre objetos e JSON é feita utilizando os métodos `fromJson` e `toJson`.
+- **Topic** (`topic.dart`): Representa os tópicos, com um nome (`name`) e uma lista de itens (`items`). A conversão entre objetos e JSON também é feita com os métodos `fromJson` e `toJson`.
+
+### 🔹 **Acesso a Dados**
+
+- O acesso aos dados e a persistência são feitos diretamente através do serviço **`storage.dart`**.
+  - **Carregamento e salvamento dos dados**: O serviço lida com os dados do usuário e tópicos, utilizando **SharedPreferences** para armazenar e recuperar as informações.
+  - Não há uma camada de **Repository Pattern** ou **DAO** adicional, pois o serviço de persistência está integrado diretamente no projeto.
 
 ### 🔹 Organização de Pastas
 
 `````text
+## Estrutura do Projeto
+
+A estrutura do projeto foi organizada para garantir uma boa manutenção e escalabilidade, com uma separação clara de responsabilidades entre os modelos de dados, serviços e a entrada principal do aplicativo. Abaixo está a explicação das pastas e arquivos principais:
+
 lib/
-├── dao/             # Acesso direto a SharedPreferences
-├── models/          # Modelos de dados (User, Topic, Item)
-├── repositories/    # Camada intermediária para lógica de acesso
-├── services/        # Serviços utilitários (ex: storage.dart)
-└── main.dart        # Entrada principal
+├── models/ # Contém os modelos de dados do aplicativo (User, Topic, Item)
+│ ├── user.dart # Modelo de dados para o usuário
+│ ├── topic.dart # Modelo de dados para os tópicos de lista
+│ └── item.dart # Modelo de dados para os itens dentro de cada tópico
+├── services/ # Contém serviços utilitários, como persistência de dados (storage.dart)
+│ └── storage.dart # Serviço responsável pela manipulação e persistência de dados locais (SharedPreferences)
+└── main.dart # Arquivo principal, responsável pela execução do app e configuração inicial
+
 
 ⚙️ Requisitos
 Flutter: 3.x ou superior
