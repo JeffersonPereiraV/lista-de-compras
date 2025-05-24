@@ -1,68 +1,88 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:soft_list/models/app_state.dart';
+import 'package:mockito/mockito.dart';
+import 'package:soft_list/blocs/topic/topic_bloc.dart';
 import 'package:soft_list/models/item.dart';
 import 'package:soft_list/models/topic.dart';
 import 'package:soft_list/widgets/topic_card.dart';
 
+class MockTopicBloc extends Mock implements TopicBloc {}
+
 void main() {
-  group('TopicCard Widget Tests', () {
-    testWidgets('TopicCard displays topic and items', (
-      WidgetTester tester,
-    ) async {
-      final appState = AppState();
-      final topic = Topic(
-        name: 'Mercado',
-        items: [Item(name: 'Maçã', price: 2.5)],
-      );
-      await appState.addTopic('Mercado');
-      await appState.addItem(0, Item(name: 'Maçã', price: 2.5));
+  late MockTopicBloc mockTopicBloc;
 
-      await tester.pumpWidget(
-        ChangeNotifierProvider(
-          create: (_) => appState,
-          child: MaterialApp(
-            home: Scaffold(body: TopicCard(topic: topic, topicIndex: 0)),
-          ),
+  setUp(() {
+    mockTopicBloc = MockTopicBloc();
+  });
+
+  Widget buildTestableWidget(Widget widget) {
+    return MaterialApp(
+      home: BlocProvider<TopicBloc>.value(value: mockTopicBloc, child: widget),
+    );
+  }
+
+  testWidgets('TopicCard displays topic name and items', (tester) async {
+    final topic = Topic(
+      name: 'Mercado',
+      items: [Item(name: 'Maçã', price: 2.5)],
+    );
+
+    await tester.pumpWidget(
+      buildTestableWidget(
+        TopicCard(topic: topic, onItemTapped: (index) {}, onAddItem: () {}),
+      ),
+    );
+
+    expect(find.text('Mercado'), findsOneWidget);
+    expect(find.text('Maçã'), findsOneWidget);
+    expect(find.text('R\$ 2.50'), findsOneWidget);
+  });
+
+  testWidgets('TopicCard triggers onItemTapped when item is tapped', (
+    tester,
+  ) async {
+    final topic = Topic(
+      name: 'Mercado',
+      items: [Item(name: 'Maçã', price: 2.5)],
+    );
+    int tappedIndex = -1;
+
+    await tester.pumpWidget(
+      buildTestableWidget(
+        TopicCard(
+          topic: topic,
+          onItemTapped: (index) => tappedIndex = index,
+          onAddItem: () {},
         ),
-      );
+      ),
+    );
 
-      expect(find.text('Mercado'), findsOneWidget);
-      expect(find.text('Maçã'), findsOneWidget);
-      expect(find.text('BRL 2.50'), findsOneWidget);
-    });
+    await tester.tap(find.text('Maçã'));
+    await tester.pump();
 
-    testWidgets('TopicCard navigates to add item on FAB tap', (
-      WidgetTester tester,
-    ) async {
-      final appState = AppState();
-      final topic = Topic(name: 'Mercado', items: []);
-      final router = GoRouter(
-        routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => TopicCard(topic: topic, topicIndex: 0),
-          ),
-          GoRoute(
-            path: '/add-item/0',
-            builder: (context, state) => const SizedBox(),
-          ),
-        ],
-      );
+    expect(tappedIndex, 0);
+  });
 
-      await tester.pumpWidget(
-        ChangeNotifierProvider(
-          create: (_) => appState,
-          child: MaterialApp.router(routerConfig: router),
+  testWidgets('TopicCard triggers onAddItem when add button is tapped', (
+    tester,
+  ) async {
+    final topic = Topic(name: 'Mercado', items: []);
+    bool addItemTapped = false;
+
+    await tester.pumpWidget(
+      buildTestableWidget(
+        TopicCard(
+          topic: topic,
+          onItemTapped: (index) {},
+          onAddItem: () => addItemTapped = true,
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Item'));
+    await tester.pump();
 
-      expect(find.byType(SizedBox), findsOneWidget);
-    });
+    expect(addItemTapped, true);
   });
 }

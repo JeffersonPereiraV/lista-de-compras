@@ -1,69 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
-import 'package:soft_list/models/app_state.dart';
+import 'package:mockito/mockito.dart';
+import 'package:soft_list/blocs/topic/topic_bloc.dart';
 import 'package:soft_list/models/item.dart';
 import 'package:soft_list/widgets/item_tile.dart';
 
+class MockTopicBloc extends Mock implements TopicBloc {}
+
 void main() {
-  group('ItemTile Widget Tests', () {
-    testWidgets('ItemTile toggles item checked state', (
-      WidgetTester tester,
-    ) async {
-      final appState = AppState();
-      await appState.addTopic('Mercado');
-      await appState.addItem(0, Item(name: 'Maçã', price: 2.5));
+  late MockTopicBloc mockTopicBloc;
 
-      await tester.pumpWidget(
-        ChangeNotifierProvider(
-          create: (_) => appState,
-          child: MaterialApp(
-            home: Scaffold(
-              body: ItemTile(
-                topicIndex: 0,
-                itemIndex: 0,
-                item: Item(name: 'Maçã', price: 2.5),
-              ),
-            ),
-          ),
-        ),
-      );
+  setUp(() {
+    mockTopicBloc = MockTopicBloc();
+  });
 
-      expect(find.byType(Checkbox), findsOneWidget);
-      expect(appState.topics[0].items[0].checked, false);
+  Widget buildTestableWidget(Widget widget) {
+    return MaterialApp(
+      home: BlocProvider<TopicBloc>.value(value: mockTopicBloc, child: widget),
+    );
+  }
 
-      await tester.tap(find.byType(Checkbox));
-      await tester.pumpAndSettle();
+  testWidgets('ItemTile displays item name, price, and checkbox', (
+    tester,
+  ) async {
+    const item = Item(name: 'Maçã', price: 2.5, checked: false);
 
-      expect(appState.topics[0].items[0].checked, true);
-    });
+    await tester.pumpWidget(
+      buildTestableWidget(ItemTile(item: item, onTap: () {})),
+    );
 
-    testWidgets('ItemTile deletes item on swipe', (WidgetTester tester) async {
-      final appState = AppState();
-      await appState.addTopic('Mercado');
-      await appState.addItem(0, Item(name: 'Maçã', price: 2.5));
+    expect(find.text('Maçã'), findsOneWidget);
+    expect(find.text('R\$ 2.50'), findsOneWidget);
+    expect(find.byType(Checkbox), findsOneWidget);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, false);
+  });
 
-      await tester.pumpWidget(
-        ChangeNotifierProvider(
-          create: (_) => appState,
-          child: MaterialApp(
-            home: Scaffold(
-              body: ItemTile(
-                topicIndex: 0,
-                itemIndex: 0,
-                item: Item(name: 'Maçã', price: 2.5),
-              ),
-            ),
-          ),
-        ),
-      );
+  testWidgets('ItemTile triggers onTap when tapped', (tester) async {
+    const item = Item(name: 'Maçã', price: 2.5, checked: false);
+    bool wasTapped = false;
 
-      expect(appState.topics[0].items.length, 1);
+    await tester.pumpWidget(
+      buildTestableWidget(ItemTile(item: item, onTap: () => wasTapped = true)),
+    );
 
-      await tester.drag(find.text('Maçã'), const Offset(-500, 0));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byType(ListTile));
+    await tester.pump();
 
-      expect(appState.topics[0].items.length, 0);
-    });
+    expect(wasTapped, true);
+  });
+
+  testWidgets('ItemTile triggers onTap when checkbox is tapped', (
+    tester,
+  ) async {
+    const item = Item(name: 'Maçã', price: 2.5, checked: false);
+    bool wasTapped = false;
+
+    await tester.pumpWidget(
+      buildTestableWidget(ItemTile(item: item, onTap: () => wasTapped = true)),
+    );
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pump();
+
+    expect(wasTapped, true);
   });
 }
